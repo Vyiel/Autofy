@@ -10,7 +10,7 @@ windows_location = str(os.environ['windir'])
 rootdir = windows_location[:2]
 driver_loc = rootdir+"\chromedriver"
 global driver, Playlist_Found_Error
-#
+
 # try:
 #     driver = webdriver.Chrome(executable_path=driver_loc)
 #     driver.implicitly_wait(10)
@@ -21,17 +21,17 @@ global driver, Playlist_Found_Error
 #             stable version of chromedriver on to the root of your Windows Installation!!! """)
 #
 #
-# target = 'https://accounts.spotify.com/en/login?continue=https:%2F%2FoPlaylist_Found_Errorn.spotify.com%2Fbrowse%2Ffeatured'
+# target = 'https://accounts.spotify.com/en/login?continue=https:%2F%2Fopen.spotify.com%2Fbrowse%2Ffeatured'
 # driver.get(target)
 #
-# USERNAME AND PASSWORD HERE #
-# EXAMPLE :
-# uname = "username"
-# password = "password"
-
+# # USERNAME AND PASSWORD HERE #
+# # EXAMPLE :
+# # uname = "username"
+# # password = "password"
+#
 # uname = ""
 # passw = ""
-# playlist = ""
+# playlist = "psychotic"
 #
 # driver.find_element_by_id("login-username").send_keys(uname)
 # driver.find_element_by_id("login-password").send_keys(passw)
@@ -45,7 +45,7 @@ global driver, Playlist_Found_Error
 # element = driver.find_element_by_xpath("//div[contains(@class, 'PlaylistRecommendedTracks')]")
 # actions = ActionChains(driver)
 # actions.move_to_element(element)
-# actions.Playlist_Found_Errorrform()
+# actions.perform()
 #
 # time.sleep(12)
 #
@@ -56,14 +56,14 @@ global driver, Playlist_Found_Error
 #     Artist = items.find_element_by_xpath(".//span[contains(@class, 'TrackListRow__artists ellipsis-one-line')]").text
 #     label[Track] = Artist
 #
-# file = oPlaylist_Found_Errorn("List.txt", "w", encoding='utf-8')
+# file = open("List.txt", "w", encoding='utf-8')
 # for Tracks, Artists in label.items():
 #     labels = Tracks + " " + Artists + "\n"
 #     file.writelines(labels)
 #
 # time.sleep(2)
 # driver.close()
-
+#
 # AMAZON CONVERSION #
 # USERNAME AND PASSWORD HERE #
 # EXAMPLE :
@@ -71,6 +71,12 @@ global driver, Playlist_Found_Error
 # password = "password"
 uname = ""
 passw = ""
+#
+time.sleep(10)
+
+file = open("list.txt", "r", encoding='utf-8').read()
+songs = file.split("\n")
+
 
 try:
     driver = webdriver.Chrome(executable_path=driver_loc)
@@ -91,8 +97,15 @@ except:
     print("ERROR! The redirection was not successful!!!")
 time.sleep(1)
 
-driver.execute_script('alert("Automation was not possible for 2step and OTP verification!!! Please log in within 1 minute and wait for automation to kick in!!! ");')
-time.sleep(20)
+# driver.execute_script('alert("Automation was not possible for 2step and OTP verification!!! Please log in within 1 minute and wait for automation to kick in!!! ");')
+
+driver.find_element_by_id('ap_email').send_keys(uname)
+driver.find_element_by_id('continue').click()
+time.sleep(1)
+driver.find_element_by_id('ap_password').send_keys(passw)
+driver.find_element_by_id('signInSubmit').click()
+
+time.sleep(10)
 
 target2 = "https://music.amazon.in/home"
 try:
@@ -106,7 +119,7 @@ time.sleep(2)
 
 def add_to_playlist(song):
     global driver
-    time.sleep(2)
+    time.sleep(1)
     search_box = driver.find_element_by_id('searchMusic').click()
     # print(search_box)
     time.sleep(0.5)
@@ -131,17 +144,14 @@ def add_to_playlist(song):
         menu = driver.find_element_by_xpath("//*[@id='contextMenuContainer']")
         hover = ActionChains(driver).move_to_element(menu)
         hover.perform()
+        time.sleep(0.3)
         driver.find_element_by_xpath("//span[text()='Add to playlist']").click()
-        time.sleep(0.5)
+        time.sleep(1)
         driver.find_elements_by_xpath("//span[contains(@class, 'playlistTitle')]")[1].click()
         try:
-            # driver.implicitly_wait(2)
-            # duplicate_menu = driver.find_element_by_xpath("//div[contains(@class, 'buttonContainer')]")
-            # hover = ActionChains(driver).move_to_element(duplicate_menu)
-            # hover.perform()
             time.sleep(1)
             driver.find_element_by_xpath("//div[contains(@class, 'buttonContainer')]//button[text()= 'Skip']").click()
-            driver.implicitly_wait(2)
+            driver.implicitly_wait(1)
 
         except selenium.common.exceptions.NoSuchElementException:
             pass
@@ -166,9 +176,9 @@ except selenium.common.exceptions.NoSuchElementException as e:
     driver.find_element_by_id("newPlaylistName").send_keys(playlist)
     time.sleep(.5)
     driver.find_element_by_class_name("buttonOption").click()
-    time.sleep(3)
-
-songs = ["Something's Gotta Give Camila Cabello", "asdafava", "Daydream Medasin, Joba", "Daydream Medasin, Joba"]
+    time.sleep(2)
+    for i in songs:
+        add_to_playlist(i)
 
 if Playlist_Found_Error is False:
     time.sleep(2)
@@ -177,7 +187,6 @@ if Playlist_Found_Error is False:
     # add_to_playlist("Something's Gotta Give Camila Cabello")
 
 
-# # driver.find_element_by_id('searchMusic').send_keys(song).send_keys(Keys.RETURN)
 
 
 
