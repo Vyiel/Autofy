@@ -121,7 +121,6 @@ def add_to_playlist(song):
     global driver
     time.sleep(1)
     search_box = driver.find_element_by_id('searchMusic').click()
-    # print(search_box)
     time.sleep(0.5)
     driver.find_element_by_id('searchMusic').send_keys(song)
     driver.find_element_by_class_name('playerIconSearch').click()
