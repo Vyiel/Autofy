@@ -8,44 +8,48 @@ import selenium.common.exceptions
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from termcolor import *
+import colorama
+colorama.init()
+
 
 windows_location = str(os.environ['windir'])
 rootdir = windows_location[:2]
 driver_loc = rootdir+"\chromedriver"
-global driver, Playlist_Found, Playlist_Created, wait
+
+# ENTER YOUR USERNAME AND PASSWORDS FOR RESPECTIVE ACCOUNTS #
+
+spotify_user_name = ""
+spotify_password = ""
+amazon_user_name = ""
+amazon_password = ""
+common_playlist = ""
 
 def spotify_render_list():
+    global spotify_user_name, spotify_password, common_playlist
     try:
         driver = webdriver.Chrome(executable_path=driver_loc)
         driver.implicitly_wait(10)
 
     except Exception:
-        print("""Probably The chrome driver is not matched with your current Google Chrome version.
+        cprint("""Probably The chrome driver is not matched with your current Google Chrome version.
                 Please update chrome to the latest version, and download and save the latest
-                stable version of chromedriver on to the root of your Windows Installation!!! """)
+                stable version of chromedriver on to the root of your Windows Installation!!! """, "red")
+        time.sleep(2)
+        driver.close()
 
 
     target = 'https://accounts.spotify.com/en/login?continue=https:%2F%2Fopen.spotify.com%2Fbrowse%2Ffeatured'
     driver.get(target)
 
-    # USERNAME AND PASSWORD HERE #
-    # EXAMPLE :
-    # uname = "username"
-    # password = "password"
-
-    uname = ""
-    passw = ""
-    playlist = ""
-
-    driver.find_element_by_id("login-username").send_keys(uname)
-    driver.find_element_by_id("login-password").send_keys(passw)
+    driver.find_element_by_id("login-username").send_keys(spotify_user_name)
+    driver.find_element_by_id("login-password").send_keys(spotify_password)
     driver.find_element_by_id("login-button").click()
     time.sleep(10)
-    driver.find_element_by_link_text(playlist).click()
+    driver.find_element_by_link_text(common_playlist).click()
     time.sleep(5)
 
-
-    body = driver.find_element_by_xpath("//ol[@class= 'tracklist']")
+    driver.find_element_by_xpath("//ol[@class= 'tracklist']")
     element = driver.find_element_by_xpath("//div[@class= 'PlaylistRecommendedTracks']")
     actions = ActionChains(driver)
     actions.move_to_element(element)
@@ -68,72 +72,108 @@ def spotify_render_list():
     time.sleep(5)
     driver.close()
 
-# ___ EXECUTE SPOTIFY RENDER LIST. COMMENT OUT IF PRE RENDERED ___ #
-# spotify_render_list()
+# ____________ CODE FOR SPOTIFY RENDITION ENDS ____________ #
 
 
-# AMAZON CONVERSION #
-# USERNAME AND PASSWORD HERE #
-# EXAMPLE :
-# uname = "username"
-# password = "password"
-
-uname = ""
-passw = ""
-time.sleep(10)
-
-file = open("list.txt", "r", encoding='utf-8').read()
-songs = file.split("\n")
-
-try:
-    driver = webdriver.Chrome(executable_path=driver_loc)
-    driver.implicitly_wait(3)
-except Exception:
-    print("""Probably The chrome driver is not matched with your current Google Chrome version.
-                Please update chrome to the latest version, and download and save the latest
-                stable version of chromedriver on to the root of your Windows Installation!!! """)
-
-
-playlist = "psychotic"
-target = 'https://www.amazon.in/ap/signin?_encoding=UTF8&ignoreAuthState=1&openid.assoc_handle=inflex&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.mode=checkid_setup&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&openid.ns.pape=http%3A%2F%2Fspecs.openid.net%2Fextensions%2Fpape%2F1.0&openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.in%2F%3Fref_%3Dnav_signin&switch_account='
-try:
-    driver.get(target)
-    print("Redirected to Amazon SignIn!!!")
-except:
-    print("ERROR! The redirection was not successful!!!")
-time.sleep(1)
-
-# driver.execute_script('alert("Automation was not possible for 2step and OTP verification!!! Please log in within 1 minute and wait for automation to kick in!!! ");')
-try:
-    driver.find_element_by_id('ap_email').send_keys(uname)
-    driver.find_element_by_id('continue').click()
-    time.sleep(1)
-    driver.find_element_by_id('ap_password').send_keys(passw)
-    driver.find_element_by_id('signInSubmit').click()
-except:
-    "ERROR! Some problems with Driver or Browser caught. Please restart the program!!! "
-    driver.close()
-
-time.sleep(15)
-
-target2 = "https://music.amazon.in/home"
-try:
-    driver.get(target2)
-    print("Redirected to Amazon Music!!!")
-except:
-    print("ERROR! Redirection was not successful!!!")
-time.sleep(2)
+# ____________ CODE FOR AMAZON MIGRATION _____________
 
 track_add_failed = []
 track_add_successful = []
 track_not_found = []
 track_skipped = []
 
+def transfer_to_Amazon():
+    global driver2, common_playlist, amazon_user_name, amazon_password
+
+    time.sleep(10)
+
+    file = open("list.txt", "r", encoding='utf-8').read()
+    songs = file.split("\n")
+
+    try:
+        driver2 = webdriver.Chrome(executable_path=driver_loc)
+        driver2.implicitly_wait(3)
+    except Exception:
+        print("""Probably The chrome driver is not matched with your current Google Chrome version.
+                    Please update chrome to the latest version, and download and save the latest
+                    stable version of chromedriver on to the root of your Windows Installation!!! """)
+
+    target = 'https://www.amazon.in/ap/signin?_encoding=UTF8&ignoreAuthState=1&openid.assoc_handle=inflex&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.mode=checkid_setup&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&openid.ns.pape=http%3A%2F%2Fspecs.openid.net%2Fextensions%2Fpape%2F1.0&openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.in%2F%3Fref_%3Dnav_signin&switch_account='
+    try:
+        driver2.get(target)
+        cprint("Redirected to Amazon SignIn!!!", "green")
+    except:
+        cprint("ERROR! The redirection was not successful!!!" "red")
+        time.sleep(2)
+        driver2.close()
+
+    # driver.execute_script('alert("Automation was not possible for 2step and OTP verification!!! Please log in within 1 minute and wait for automation to kick in!!! ");')
+
+    try:
+        driver2.find_element_by_id('ap_email').send_keys(amazon_user_name)
+        driver2.find_element_by_id('continue').click()
+        time.sleep(1)
+        driver2.find_element_by_id('ap_password').send_keys(amazon_password)
+        driver2.find_element_by_id('signInSubmit').click()
+    except:
+        cprint("ERROR! Some problems with Driver or Browser caught. Please restart the program!!! ", "red")
+        driver2.close()
+
+    time.sleep(15)
+
+    target2 = "https://music.amazon.in/home"
+    try:
+        driver2.get(target2)
+        cprint("Redirected to Amazon Music!!!", "green")
+    except:
+        cprint("ERROR! Redirection was not successful!!!", "red")
+        time.sleep(2)
+        driver2.close()
+
+    try:
+        driver2.find_element_by_xpath("//div[contains(@class, 'icon-exit closeButton')]").click()
+        cprint("Language Preference Popped up, and closed", "blue")
+    except selenium.common.exceptions.NoSuchElementException:
+        cprint("Language Preference Popup didn't popup!!! Skipping to Playlist", "blue")
+
+    Playlist_Found = 0
+    Playlist_Created = 0
+
+    try:
+        time.sleep(2)
+        driver2.find_element_by_link_text(common_playlist)
+        cprint("Playlist -> "+ common_playlist + " found, Will skip to adding tracks!!!", "green")
+        Playlist_Found = 1
+
+    except selenium.common.exceptions.NoSuchElementException:
+        cprint("playlist -> " + common_playlist + " not found. Hence created and will move to adding tracks!!! ", "blue")
+        driver2.find_element_by_id("newPlaylist").click()
+        time.sleep(.5)
+        driver2.find_element_by_id("newPlaylistName").send_keys(common_playlist)
+        time.sleep(.5)
+        driver2.find_element_by_class_name("buttonOption").click()
+        time.sleep(2)
+        Playlist_Created = 1
+
+    iteration_count = 0
+
+    if Playlist_Found or Playlist_Created is 1:
+        time.sleep(2)
+        for i in songs:
+            iteration_count = iteration_count + 1
+            if iteration_count == len(songs):
+                cprint("Possible tracks has added to Amazon Playlist. The program ends here", "green")
+                write_logs()
+            else:
+                add_to_playlist(i)
+
+    #     add_to_playlist("Something's Gotta Give Camila Cabello")
+
 def add_to_playlist(song):
-    global track_add_successful, track_add_failed, track_not_found, track_skipped
+    global track_add_successful, track_add_failed, track_not_found, track_skipped, common_playlist, driver2
+
     time.sleep(1)
-    driver.implicitly_wait(2)
-    wait = WebDriverWait(driver, 6)
+    wait = WebDriverWait(driver2, 6)
     try:
         wait_for_search = wait.until(EC.element_to_be_clickable((By.ID, 'searchMusic')))
         wait_for_search.click()
@@ -143,7 +183,7 @@ def add_to_playlist(song):
         try_blk1 = False
 
 
-    if try_blk1 == True:
+    if try_blk1 is True:
         try:
             wait_to_click = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'playerIconSearch')))
             wait_to_click.click()
@@ -152,15 +192,13 @@ def add_to_playlist(song):
         except selenium.common.exceptions:
             try_blk2 = False
 
-
     else:
-        print("ERROR: Operation on search element failed. Skipping current operation!!!")
-
+        cprint("ERROR: Operation on search element failed. Skipping current operation!!!", "red")
 
     if try_blk2 is True:
         try:
             wait.until(EC.visibility_of_element_located((By.XPATH, "//div[@class='titles']//h2[text()='Songs']")))
-            print("Search result found for track -> " + song)
+            cprint("Search result found for track -> " + song, "green")
             song_found = True
             # print("Song found from 1st successful execution: " + str(song_found))
 
@@ -170,7 +208,7 @@ def add_to_playlist(song):
 
         except TypeError:
             song_found = False
-            print("Song found from 2nd exception: " + str(song_found))
+            # print("Song found from 2nd exception: " + str(song_found))
 
     # print("Song found from check status: " + str(song_found))
     if song_found is True:
@@ -184,58 +222,32 @@ def add_to_playlist(song):
                 except:
                     continue
 
-            menu = driver.find_element_by_xpath("//*[@id='contextMenuContainer']")
-            hover = ActionChains(driver).move_to_element(menu)
+            menu = driver2.find_element_by_xpath("//*[@id='contextMenuContainer']")
+            hover = ActionChains(driver2).move_to_element(menu)
             hover.perform()
             add_pl = wait.until(EC.presence_of_element_located((By.XPATH, "//span[text()='Add to playlist']")))
             add_pl.click()
-            click_add = wait.until(EC.presence_of_element_located((By.XPATH, "//span[@class= 'playlistTitle' and text()= '"+playlist+"']")))
+            click_add = wait.until(EC.presence_of_element_located((By.XPATH, "//span[@class= 'playlistTitle' and text()= '"+common_playlist+"']")))
             click_add.click()
 
             try:
                 skip = wait.until(EC.presence_of_element_located((By.XPATH, "//div[@class= 'buttonContainer']//button[text()= 'Skip']")))
-                print("Track -> " + song + " already in your library. Skipping to the next!!")
+                cprint("Track -> " + song + " already in your library. Skipping to the next!!", "blue")
                 track_skipped.append(song)
                 skip.click()
             except selenium.common.exceptions.TimeoutException:
                 track_add_successful.append(song)
-                print("Track -> " + song + " Added to Library: " + playlist)
+                cprint("Track -> " + song + " Added to Library: " + common_playlist, "green")
                 pass
 
         except selenium.common.exceptions:
-            print("Unknown error has occurred during adding the song -> " + song)
+            cprint("Unknown error has occurred during adding the song -> " + song, "red")
             track_add_failed.append(song)
             pass
 
     else:
-        print(song + " Not found. Skipping to the next!!! ")
+        cprint(song + " Not found. Skipping to the next!!! ", "red")
         track_not_found.append(song)
-
-try:
-    driver.find_element_by_xpath("//div[contains(@class, 'icon-exit closeButton')]").click()
-    print("Language Preference Popped up, and closed")
-except selenium.common.exceptions.NoSuchElementException as e:
-    print("Language Preference Popup didn't popup!!! Skipping to Playlist")
-
-Playlist_Found = 0
-Playlist_Created = 0
-
-try:
-    time.sleep(2)
-    driver.find_element_by_link_text(playlist)
-    print("Playlist -> "+ playlist + " found, Will skip to adding tracks!!!")
-    Playlist_Found = 1
-
-except selenium.common.exceptions.NoSuchElementException:
-    print("Playlist not Found, Will be created")
-    driver.find_element_by_id("newPlaylist").click()
-    time.sleep(.5)
-    driver.find_element_by_id("newPlaylistName").send_keys(playlist)
-    time.sleep(.5)
-    driver.find_element_by_class_name("buttonOption").click()
-    time.sleep(2)
-    print("playlist -> " + playlist + " not found. Hence created and will move to adding tracks!!! ")
-    Playlist_Created = 1
 
 def write_logs():
     global track_add_successful, track_add_failed, track_not_found, track_skipped
@@ -272,19 +284,9 @@ def write_logs():
         file_not_found.write(name)
     # file_not_found.close()
 
-iteration_count = 0
-if Playlist_Found or Playlist_Created is 1:
-    time.sleep(2)
-    for i in songs:
-        iteration_count = iteration_count + 1
-        if iteration_count == len(songs):
-            "Possible tracks has added to Amazon Playlist. The program ends here"
-            write_logs()
-        else:
-            add_to_playlist(i)
 
-#     add_to_playlist("Something's Gotta Give Camila Cabello")
+# ___________ CALLS FOR SPECIFIC OPERATIONS. COMMENT IN OR OUT FOR SINGLE JOBS _____________ #
 
-
-
+# spotify_render_list()
+# transfer_to_Amazon()
 
