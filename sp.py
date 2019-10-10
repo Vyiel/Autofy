@@ -16,6 +16,7 @@ colorama.init()
 windows_location = str(os.environ['windir'])
 rootdir = windows_location[:2]
 driver_loc = rootdir+"\chromedriver"
+# driver_loc is the variable that stores the current directory of chromedriver. You can change it at your will.
 
 # ENTER YOUR USERNAME AND PASSWORDS FOR RESPECTIVE ACCOUNTS #
 
@@ -30,7 +31,6 @@ def spotify_render_list():
     try:
         driver = webdriver.Chrome(executable_path=driver_loc)
         driver.implicitly_wait(10)
-
     except Exception:
         cprint("""Probably The chrome driver is not matched with your current Google Chrome version.
                 Please update chrome to the latest version, and download and save the latest
@@ -75,7 +75,7 @@ def spotify_render_list():
 # ____________ CODE FOR SPOTIFY RENDITION ENDS ____________ #
 
 
-# ____________ CODE FOR AMAZON MIGRATION _____________
+# ____________ CODE FOR AMAZON MIGRATION _____________ #
 
 track_add_failed = []
 track_add_successful = []
@@ -87,7 +87,7 @@ def transfer_to_Amazon():
 
     time.sleep(10)
 
-    file = open("list.txt", "r", encoding='utf-8').read()
+    file = open("List.txt", "r", encoding='utf-8').read()
     songs = file.split("\n")
 
     try:
@@ -285,8 +285,85 @@ def write_logs():
     # file_not_found.close()
 
 
-# ___________ CALLS FOR SPECIFIC OPERATIONS. COMMENT IN OR OUT FOR SINGLE JOBS _____________ #
+# ____________ CODE FOR YOUTUBE SEARCH RESULT RENDITION _____________ #
+
+youtube_links = []
+def render_youtube_links():
+    global driver3
+
+    file = open("List.txt", "r", encoding='utf-8').read()
+    songs = file.split("\n")
+
+    try:
+        driver3 = webdriver.Chrome(executable_path=driver_loc)
+        driver3.implicitly_wait(3)
+    except Exception:
+        cprint("""Probably The chrome driver is not matched with your current Google Chrome version.
+                    Please update chrome to the latest version, and download and save the latest
+                    stable version of chromedriver on to the root of your Windows Installation!!! """, "red")
+
+    target = "https://www.youtube.com/"
+    try:
+        driver3.get(target)
+        cprint("Redirected to YouTube Search Page!!!", "green")
+    except:
+        cprint("ERROR! The redirection was not successful!!!" "red")
+        time.sleep(2)
+        driver2.close()
+
+    time.sleep(5)
+
+    for song in songs:
+        cprint("Searching for track -> " + song, "blue")
+        search_song(song)
+
+    cprint("All possible links has been noted down", "green")
+
+    # song = "Cycle Sabrina Claudio"
+    # search_song(song)
+
+def search_song(song):
+    global driver3, youtube_links
+    wait = WebDriverWait(driver3, 3)
+    time.sleep(1)
+    driver3.find_element_by_id("search").send_keys(song)
+    time.sleep(1)
+    driver3.find_element_by_id("search-icon-legacy").click()
+    time.sleep(1)
+    try:
+        all_results = driver3.find_elements_by_xpath("//div[@id='dismissable' and @class='style-scope ytd-video-renderer']//a[@id='video-title']")
+        cprint("The first link is been noted down! Might not be accurate", "green")
+        link = all_results[0].get_attribute("href")
+        youtube_links.append(str(link))
+
+    except selenium.common.exceptions:
+        cprint("ERROR performing operation", "red")
+
+    driver3.find_element_by_id('search').send_keys(Keys.CONTROL + "a")
+    time.sleep(1)
+    driver3.find_element_by_id('search').send_keys(Keys.DELETE)
+    time.sleep(1)
+
+    file = open("Youtube_links.txt", 'w', encoding = 'utf-8')
+    for link in youtube_links:
+        writable_link = str(link) + "\n"
+        file.write(writable_link)
+
+
+# ___________ CODE FOR YOUTUBE -> MP3 ____________ #
+
+def yt2mp3():
+    file = "Youtube_links.txt"
+    ytdlroot = rootdir + "\ytdl\\"
+    command = ytdlroot + "youtube-dl.exe -a " + file + " -x --audio-format mp3 --audio-quality 0"
+    print(command)
+    os.system(command)
+
+
+# _________________ RUN SPECIFIC OR BATCH JOBS FROM HERE _________________ #
+
 
 # spotify_render_list()
-# transfer_to_Amazon()
-
+# # transfer_to_Amazon()
+# render_youtube_links()
+# yt2mp3()
