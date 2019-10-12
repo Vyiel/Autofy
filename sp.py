@@ -325,16 +325,52 @@ def render_youtube_links():
 def search_song(song):
     global driver3, youtube_links
     wait = WebDriverWait(driver3, 3)
+    link = str()
+    ytlf = bool
     time.sleep(1)
     driver3.find_element_by_id("search").send_keys(song)
     time.sleep(1)
     driver3.find_element_by_id("search-icon-legacy").click()
     time.sleep(1)
     try:
+        ##### _________ CODE IF YOU WANT TO GRAB ALL THE FIRST AVAILABLE LINKS REGARDLESS OF MATCH _________ #####
+
         all_results = driver3.find_elements_by_xpath("//div[@id='dismissable' and @class='style-scope ytd-video-renderer']//a[@id='video-title']")
-        cprint("The first link is been noted down! Might not be accurate", "green")
+        cprint("The first link has been noted down! Might not be accurate", "yellow")
+        cprint("The link has been grabbed from -> '" + str(all_results[0].get_attribute("title")) + "'", "green")
         link = all_results[0].get_attribute("href")
         youtube_links.append(str(link))
+        print("______________________________________________________________")
+
+        ##########################################################################################################
+
+        ##### _________ CODE IF YOU WANT TO GRAB ALL THE FIRST AVAILABLE LINKS WHEN AND IF THERE IS A MATCH _________ #####
+
+        # song_names = song.split(" ")
+        # for words in song_names:
+        #     try:
+        #         print(words)
+        #         results = driver3.find_elements_by_xpath("//a[@id='video-title' and contains(@title, '" + words + "')]")
+        #         link = results[0].get_attribute("href")
+        #         ytlf = True
+        #         print(results[0].get_attribute("title"))
+        #         break
+        #     except:
+        #         ytlf = False
+        #         continue
+        #
+        # if ytlf is True:
+        #     cprint("The Track -> " + song + " is possibly found and has been noted down", "green")
+        # else:
+        #     cprint("The Track -> " + song + " is not found and skipped to the next", "red")
+        #
+        # youtube_links.append(str(link))
+        # print("______________________________________________________________")
+
+
+        # ALSO BUGGY AT TIMES. USE WHATEVER MODULE YOU WANT
+        ###################################################################################################################
+
 
     except selenium.common.exceptions:
         cprint("ERROR performing operation", "red")
@@ -346,8 +382,9 @@ def search_song(song):
 
     file = open("Youtube_links.txt", 'w', encoding = 'utf-8')
     for link in youtube_links:
-        writable_link = str(link) + "\n"
-        file.write(writable_link)
+        if len(link) >= 1:
+            writable_link = str(link) + "\n"
+            file.write(writable_link)
 
 
 # ___________ CODE FOR YOUTUBE -> MP3 ____________ #
@@ -365,5 +402,5 @@ def yt2mp3():
 
 # spotify_render_list()
 # # transfer_to_Amazon()
-# render_youtube_links()
+render_youtube_links()
 # yt2mp3()
