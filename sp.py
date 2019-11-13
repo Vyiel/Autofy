@@ -324,7 +324,7 @@ def render_youtube_links():
 
 def search_song(song):
     global driver3, youtube_links
-    wait = WebDriverWait(driver3, 3)
+    # wait = WebDriverWait(driver3, 3)
     link = str()
     ytlf = bool
     time.sleep(1)
@@ -335,37 +335,39 @@ def search_song(song):
     try:
         ##### _________ CODE IF YOU WANT TO GRAB ALL THE FIRST AVAILABLE LINKS REGARDLESS OF MATCH _________ #####
 
-        all_results = driver3.find_elements_by_xpath("//div[@id='dismissable' and @class='style-scope ytd-video-renderer']//a[@id='video-title']")
-        cprint("The first link has been noted down! Might not be accurate", "yellow")
-        cprint("The link has been grabbed from -> '" + str(all_results[0].get_attribute("title")) + "'", "green")
-        link = all_results[0].get_attribute("href")
-        youtube_links.append(str(link))
-        print("______________________________________________________________")
+        # all_results = driver3.find_elements_by_xpath("//div[@id='dismissable' and @class='style-scope ytd-video-renderer']//a[@id='video-title']")
+        # cprint("The first link has been noted down! Might not be accurate", "yellow")
+        # cprint("The link has been grabbed from -> '" + str(all_results[0].get_attribute("title")) + "'", "green")
+        # link = all_results[0].get_attribute("href")
+        # youtube_links.append(str(link))
+        # print("______________________________________________________________")
 
         ##########################################################################################################
 
         ##### _________ CODE IF YOU WANT TO GRAB ALL THE FIRST AVAILABLE LINKS WHEN AND IF THERE IS A MATCH _________ #####
 
-        # song_names = song.split(" ")
-        # for words in song_names:
-        #     try:
-        #         print(words)
-        #         results = driver3.find_elements_by_xpath("//a[@id='video-title' and contains(@title, '" + words + "')]")
-        #         link = results[0].get_attribute("href")
-        #         ytlf = True
-        #         print(results[0].get_attribute("title"))
-        #         break
-        #     except:
-        #         ytlf = False
-        #         continue
-        #
-        # if ytlf is True:
-        #     cprint("The Track -> " + song + " is possibly found and has been noted down", "green")
-        # else:
-        #     cprint("The Track -> " + song + " is not found and skipped to the next", "red")
-        #
-        # youtube_links.append(str(link))
-        # print("______________________________________________________________")
+        song_names = song.split(" ")
+        i = 0
+        for words in range(len(song_names)):
+            try:
+                # print(words)
+                results = driver3.find_elements_by_xpath("//a[@id='video-title' and contains(@title, '" + song_names[words] + "')]")
+                link = results[0].get_attribute("href")
+                # ytlf = True
+                i = i + 1
+                # print(results[0].get_attribute("title"))
+
+            except:
+                # ytlf = False
+                continue
+
+        if i >= 2:
+            cprint("The Track -> " + song + " is possibly found and has been noted down", "green")
+        else:
+            cprint("The Track -> " + song + " is not found and skipped to the next", "red")
+
+        youtube_links.append(str(link))
+        print("______________________________________________________________")
 
 
         # ALSO BUGGY AT TIMES. USE WHATEVER MODULE YOU WANT
@@ -399,8 +401,59 @@ def yt2mp3():
 
 # _________________ RUN SPECIFIC OR BATCH JOBS FROM HERE _________________ #
 
+def help_display():
+    cprint("""
+    This is a program where you can migrate from Spotify to Amazon for now, and then if you want, you can
+    download(buggy) all the tracks from youtube.
+    You can run the whole job at once or part by part which I would prefer.
+    The three manual parts that you have to do within the code(for now), is typing in the Usernames and Passwords,
+    along with the specific playlist to migrate to and from ...
+    Depending on the circumstances, Here are the arguments that you can provide:
+    
+    1) For rendering all the track names from spotify : sp
+    2) For migrating from pre-rendered track list to Amazon : amz
+    3) For rendering the Youtube links from pre rendered track list : listyt
+    4) For downloading all the pre-rendered Youtube Links: dyt
+    5) For doing the whole job all at once: all
+    
+    ---------> EXAMPLE : python sp.py listyt <---------
+    
+    The program is automation based, so is prone to bugs. In case of an error, you have to start over,
+    and in case of Youtube link rendition. It's possible to render wrong link for un-common tracks.   
+    The codes for noting down the first possible link and/or a link which has multiple matches are already done.
+    Feel free to use, change or modify.
+    
+    Thank you for using ...
+    
+    """, "green")
+
+def run_all():
+
+    spotify_render_list()
+    transfer_to_Amazon()
+    render_youtube_links()
+    yt2mp3()
+
+def main():
+    # print(str(sys.argv))
+    if len(sys.argv) <=1:
+        help_display()
+    elif sys.argv[1] == "sp":
+        spotify_render_list()
+    elif sys.argv[1] == "amz":
+        transfer_to_Amazon()
+    elif sys.argv[1] == "listyt":
+        render_youtube_links()
+    elif sys.argv[1] == "dyt":
+        yt2mp3()
+    elif sys.argv[1] == "all":
+        run_all()
+
+if __name__ == '__main__':
+    main()
+
 
 # spotify_render_list()
-# # transfer_to_Amazon()
-render_youtube_links()
+# transfer_to_Amazon()
+# render_youtube_links()
 # yt2mp3()
